@@ -28,4 +28,5 @@ dependencies {
     implementation "com.android.support:percent:$APPCOMPAT_VERSION"
     implementation "com.github.andremion:musiccoverview:$MUSICCOVERVIEW_VERSION"
     testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }

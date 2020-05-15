@@ -31,6 +31,7 @@ import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
+    //Массив элементов MusicItem
     private final List<MusicItem> mValues;
 
     public RecyclerViewAdapter(List<MusicItem> items) {
@@ -55,7 +56,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Nothing to do
+
             }
         });
     }

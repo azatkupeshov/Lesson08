@@ -17,39 +17,42 @@
 package com.sample.andremion.musicplayer.activities;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.transition.Transition;
 import android.view.View;
+import android.widget.Toast;
 
 import com.andremion.music.MusicCoverView;
 import com.sample.andremion.musicplayer.R;
 import com.sample.andremion.musicplayer.view.TransitionAdapter;
 
-public class DetailActivity extends PlayerActivity {
+public class DetailActivity extends AppCompatActivity {
 
     private MusicCoverView mCoverView;
+
+    private MusicCoverView.Callbacks callbacks = new MusicCoverView.Callbacks() {
+        @Override
+        public void onMorphEnd(MusicCoverView coverView) {
+            // Nothing to do
+        }
+
+        @Override
+        public void onRotateEnd(MusicCoverView coverView) {
+            supportFinishAfterTransition();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_detail);
+        setContentView(R.layout.activity_detail);
 
-        mCoverView = (MusicCoverView) findViewById(R.id.cover);
-        mCoverView.setCallbacks(new MusicCoverView.Callbacks() {
-            @Override
-            public void onMorphEnd(MusicCoverView coverView) {
-                // Nothing to do
-            }
-
-            @Override
-            public void onRotateEnd(MusicCoverView coverView) {
-                supportFinishAfterTransition();
-            }
-        });
+        mCoverView = findViewById(R.id.cover);
+        mCoverView.setCallbacks(callbacks);
 
         getWindow().getSharedElementEnterTransition().addListener(new TransitionAdapter() {
             @Override
             public void onTransitionEnd(Transition transition) {
-                play();
                 mCoverView.start();
             }
         });
@@ -58,11 +61,12 @@ public class DetailActivity extends PlayerActivity {
     @Override
     public void onBackPressed() {
         onFabClick(null);
+        mCoverView.stop();
     }
 
     public void onFabClick(View view) {
-        pause();
         mCoverView.stop();
+        Toast.makeText(this, "Stop", Toast.LENGTH_SHORT).show();
     }
 
 }

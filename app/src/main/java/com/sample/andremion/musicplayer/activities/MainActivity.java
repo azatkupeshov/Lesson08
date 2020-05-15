@@ -42,9 +42,8 @@ public class MainActivity extends PlayerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_list);
+        setContentView(R.layout.activity_main);
 
-        //
         mCoverView = findViewById(R.id.cover);
         mTitleView = findViewById(R.id.title);
         mTimeView = findViewById(R.id.time);
@@ -52,15 +51,21 @@ public class MainActivity extends PlayerActivity {
         mProgressView = findViewById(R.id.progress);
         mFabView = findViewById(R.id.fab);
 
-        // Set the recycler adapter
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.tracks);
+        //Инициализация RecyclerView
+        RecyclerView recyclerView = findViewById(R.id.tracks);
         assert recyclerView != null;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new RecyclerViewAdapter(MusicContent.ITEMS));
+        //Инициализация адаптера.
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(MusicContent.ITEMS);
+        recyclerView.setAdapter(adapter);
     }
 
+
+    /**
+     * Обработчик FloatingActionButton
+     * @param view
+     */
     public void onFabClick(View view) {
-        //noinspection unchecked
         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
                 new Pair<>(mCoverView, ViewCompat.getTransitionName(mCoverView)),
                 new Pair<>(mTitleView, ViewCompat.getTransitionName(mTitleView)),
@@ -68,7 +73,6 @@ public class MainActivity extends PlayerActivity {
                 new Pair<>(mDurationView, ViewCompat.getTransitionName(mDurationView)),
                 new Pair<>(mProgressView, ViewCompat.getTransitionName(mProgressView)),
                 new Pair<>(mFabView, ViewCompat.getTransitionName(mFabView)));
-        ActivityCompat.startActivity(this, new Intent(this, DetailActivity.class), options.toBundle());
+        startActivity( new Intent(this, DetailActivity.class), options.toBundle());
     }
-
 }
