@@ -22,10 +22,6 @@
             android:theme="@style/AppTheme.Detail">
         </activity>
 
-        <service
-            android:name=".music.PlayerService"
-            android:enabled="true"
-            android:exported="false" />
     </application>
 
 </manifest>

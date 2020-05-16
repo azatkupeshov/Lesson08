@@ -66,21 +66,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return mValues.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final ImageView mCoverView;
-        public final TextView mTitleView;
-        public final TextView mArtistView;
-        public final TextView mDurationView;
-        public MusicItem mItem;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final ImageView mCoverView;
+        final TextView mTitleView;
+        final TextView mArtistView;
+        final TextView mDurationView;
+        MusicItem mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mCoverView = (ImageView) view.findViewById(R.id.cover);
-            mTitleView = (TextView) view.findViewById(R.id.title);
-            mArtistView = (TextView) view.findViewById(R.id.artist);
-            mDurationView = (TextView) view.findViewById(R.id.duration);
+            mCoverView = view.findViewById(R.id.cover);
+            mTitleView = view.findViewById(R.id.title);
+            mArtistView = view.findViewById(R.id.artist);
+            mDurationView = view.findViewById(R.id.duration);
         }
     }
 
