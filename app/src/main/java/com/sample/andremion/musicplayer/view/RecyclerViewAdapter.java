@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.sample.andremion.musicplayer.R;
 import com.sample.andremion.musicplayer.music.MusicContent.MusicItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {

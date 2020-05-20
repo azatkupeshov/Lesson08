@@ -33,6 +33,8 @@ public class MusicContent {
         ITEMS.add(new MusicItem(R.drawable.album_cover_two_door, "Something good can work", "Two Door Cinema Club", 164));
     }
 
+
+
     public static class MusicItem {
 
         private final int mCover;
@@ -45,6 +47,7 @@ public class MusicContent {
             mTitle = title;
             mArtist = artist;
             mDuration = duration;
+
         }
 
         public int getCover() {
