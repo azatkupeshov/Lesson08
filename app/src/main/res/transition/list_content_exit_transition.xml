@@ -3,15 +3,9 @@
     android:duration="@integer/anim_duration_default"
     android:startDelay="@integer/anim_duration_default">
 
-    <fade>
-        <targets>
-            <target android:targetId="@id/pane" />
-        </targets>
-    </fade>
     <slide android:slideEdge="bottom">
         <targets>
             <target android:excludeId="@android:id/statusBarBackground" />
-            <target android:excludeId="@id/pane" />
             <target android:excludeId="@android:id/navigationBarBackground" />
         </targets>
     </slide>

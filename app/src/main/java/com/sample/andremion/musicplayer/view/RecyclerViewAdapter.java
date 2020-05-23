@@ -16,6 +16,12 @@
 
 package com.sample.andremion.musicplayer.view;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -23,11 +29,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sample.andremion.musicplayer.R;
+import com.sample.andremion.musicplayer.activities.DetailActivity;
+import com.sample.andremion.musicplayer.databases.DatabaseHelper;
+import com.sample.andremion.musicplayer.music.MusicContent;
 import com.sample.andremion.musicplayer.music.MusicContent.MusicItem;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -48,16 +57,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        final Context context = holder.mView.getContext();
+        final MusicContent musicContent = new DatabaseHelper(context);
         holder.mItem = mValues.get(position);
-        holder.mCoverView.setImageResource(holder.mItem.getCover());
-        holder.mTitleView.setText(holder.mItem.getTitle());
-        holder.mArtistView.setText(holder.mItem.getArtist());
+        holder.mTitleView.setText(holder.mItem.getSongName());
+        holder.mArtistView.setText(holder.mItem.getArtistName());
         holder.mDurationView.setText(DateUtils.formatElapsedTime(holder.mItem.getDuration()));
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context,
+                        new Pair<>((View)holder.mCoverView, context.getString(R.string.transition_name_cover)));
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("musicItem", holder.mItem);
+                context.startActivity(intent, options.toBundle());
+            }
+        });
+        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                musicContent.markAsFavorite(holder.mItem.getID());
+                Toast.makeText(context, "Песня " + holder.mItem.getSongName() + " добавлена в избранное!", Toast.LENGTH_LONG).show();
+                return true;
             }
         });
     }

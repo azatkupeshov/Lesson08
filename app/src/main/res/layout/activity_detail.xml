@@ -17,13 +17,37 @@
         app:layout_heightPercent="35%"
         app:shape="circle" />
 
-    <include
-        android:id="@+id/title"
-        layout="@layout/track_title"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        app:layout_marginTopPercent="10%"/>
+        app:layout_marginTopPercent = "15%"
+        android:transitionName="@string/transition_name_title">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_artist_name"
+            android:text="Instant Crush"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" - "
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textColor="?android:attr/textColorSecondary"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_song_name"
+            android:text="Daft Punk"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textColor="?android:attr/textColorSecondary"/>
+
+    </LinearLayout>
 
     <com.sample.andremion.musicplayer.view.ProgressView
         android:id="@+id/progress"

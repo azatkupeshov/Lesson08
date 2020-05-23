@@ -16,19 +16,24 @@
 
 package com.sample.andremion.musicplayer.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.Transition;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andremion.music.MusicCoverView;
 import com.sample.andremion.musicplayer.R;
+import com.sample.andremion.musicplayer.music.MusicContent;
 import com.sample.andremion.musicplayer.view.TransitionAdapter;
 
 public class DetailActivity extends AppCompatActivity {
 
     private MusicCoverView mCoverView;
+    private TextView tvArtistName;
+    private TextView tvSongName;
 
     private MusicCoverView.Callbacks callbacks = new MusicCoverView.Callbacks() {
         @Override
@@ -49,6 +54,15 @@ public class DetailActivity extends AppCompatActivity {
 
         mCoverView = findViewById(R.id.cover);
         mCoverView.setCallbacks(callbacks);
+
+        tvArtistName = findViewById(R.id.tv_artist_name);
+        tvSongName = findViewById(R.id.tv_song_name);
+
+        Intent intent = getIntent();
+        MusicContent.MusicItem musicItem = (MusicContent.MusicItem) intent.getSerializableExtra("musicItem");
+
+        tvArtistName.setText(musicItem.getArtistName());
+        tvSongName.setText(musicItem.getSongName());
 
         getWindow().getSharedElementEnterTransition().addListener(new TransitionAdapter() {
             @Override

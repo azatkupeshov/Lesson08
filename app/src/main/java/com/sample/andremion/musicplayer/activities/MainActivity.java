@@ -22,10 +22,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,6 +42,10 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.sample.andremion.musicplayer.R;
+import com.sample.andremion.musicplayer.databases.DatabaseHelper;
+import com.sample.andremion.musicplayer.fragments.FavoriteFragment;
+import com.sample.andremion.musicplayer.fragments.MusicListFragment;
+import com.sample.andremion.musicplayer.fragments.TopFragment;
 import com.sample.andremion.musicplayer.music.MusicContent;
 import com.sample.andremion.musicplayer.music.MusicFinder;
 import com.sample.andremion.musicplayer.utils.Utils;
@@ -53,24 +63,12 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    private View mCoverView;
-    private View mTitleView;
-    private View mTimeView;
-    private View mDurationView;
-    private View mProgressView;
-    private View mFabView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mCoverView = findViewById(R.id.cover);
-        mTitleView = findViewById(R.id.title);
-        mTimeView = findViewById(R.id.time);
-        mDurationView = findViewById(R.id.duration);
-        mProgressView = findViewById(R.id.progress);
-        mFabView = findViewById(R.id.fab);
 
         //Проверка необходимых разрешений
         //Необходимо делать эту операции до того как потребуется доступ к файлам
@@ -79,27 +77,20 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, permissions, ALL_PERMISSIONS);
         }
 
-        //Инициализация RecyclerView
-        RecyclerView recyclerView = findViewById(R.id.tracks);
-        assert recyclerView != null;
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPagerAdapter.addFragment(new MusicListFragment(), "Песни");
+        viewPagerAdapter.addFragment(new FavoriteFragment(), "Избранное");
+        viewPagerAdapter.addFragment(new TopFragment(), "Топ");
 
-        //Данные для заполнения RecyclerView
+
+        ViewPager viewPager = findViewById(R.id.viewpager);
+        viewPager.setAdapter(viewPagerAdapter);
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        tabLayout.setupWithViewPager(viewPager);
+
+        MusicContent musicContent = new DatabaseHelper(this);
         MusicFinder musicFinder = new MusicFinder(this);
-        ArrayList<MusicContent.MusicItem> songslist = musicFinder.findSongsImproved();
-
-        //Инициализация адаптера и заполнение данных
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(songslist);
-        recyclerView.setAdapter(adapter);
-
-        //Работа с файлами.
-        Utils utils = new Utils(this);
-        //Запись в файл
-        utils.writeLocalFile("test.txt", "Привет всем!");
-        //Чтение из файла
-        String data = utils.readLocalFile("test.txt");
-        Toast.makeText(this, data, Toast.LENGTH_LONG).show();
-
+        musicFinder.fillDatabase(musicContent);
     }
 
 
@@ -154,20 +145,36 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private static class ViewPagerAdapter extends FragmentStatePagerAdapter{
 
-    /**
-     * Обработчик FloatingActionButton
-     *
-     * @param view
-     */
-    public void onFabClick(View view) {
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
-                new Pair<>(mCoverView, ViewCompat.getTransitionName(mCoverView)),
-                new Pair<>(mTitleView, ViewCompat.getTransitionName(mTitleView)),
-                new Pair<>(mTimeView, ViewCompat.getTransitionName(mTimeView)),
-                new Pair<>(mDurationView, ViewCompat.getTransitionName(mDurationView)),
-                new Pair<>(mProgressView, ViewCompat.getTransitionName(mProgressView)),
-                new Pair<>(mFabView, ViewCompat.getTransitionName(mFabView)));
-        startActivity(new Intent(this, DetailActivity.class), options.toBundle());
+        ArrayList<Fragment> fragments  = new ArrayList<>();
+        ArrayList<String> titles = new ArrayList<>();
+
+        public ViewPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return fragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return fragments.size();
+        }
+
+        @Nullable
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return titles.get(position);
+        }
+
+        public ViewPagerAdapter addFragment(Fragment fragment, String title){
+            fragments.add(fragment);
+            titles.add(title);
+            return this;
+        }
     }
+
 }
