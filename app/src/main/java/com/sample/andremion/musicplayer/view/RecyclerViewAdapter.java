@@ -36,16 +36,21 @@ import com.sample.andremion.musicplayer.activities.DetailActivity;
 import com.sample.andremion.musicplayer.databases.DatabaseHelper;
 import com.sample.andremion.musicplayer.music.MusicContent;
 import com.sample.andremion.musicplayer.music.MusicContent.MusicItem;
+import com.sample.andremion.musicplayer.view.ItemTouchHelper.ItemTouchHelperAdapter;
 
+import java.util.Collections;
 import java.util.List;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
     //Массив элементов MusicItem
     private final List<MusicItem> mValues;
-
-    public RecyclerViewAdapter(List<MusicItem> items) {
+    private final Context context;
+    private final MusicContent musicContent;
+    public RecyclerViewAdapter(List<MusicItem> items, Context context) {
         mValues = items;
+        this.context = context;
+        musicContent = new DatabaseHelper(context);
     }
 
     @Override
@@ -57,29 +62,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final Context context = holder.mView.getContext();
-        final MusicContent musicContent = new DatabaseHelper(context);
-        holder.mItem = mValues.get(position);
-        holder.mTitleView.setText(holder.mItem.getSongName());
-        holder.mArtistView.setText(holder.mItem.getArtistName());
-        holder.mDurationView.setText(DateUtils.formatElapsedTime(holder.mItem.getDuration()));
+        final MusicItem musicItem = mValues.get(position);
+        holder.mTitleView.setText(musicItem.getSongName());
+        holder.mArtistView.setText(musicItem.getArtistName());
+        holder.mDurationView.setText(DateUtils.formatElapsedTime(musicItem.getDuration()));
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context,
-                        new Pair<>((View)holder.mCoverView, context.getString(R.string.transition_name_cover)));
+                musicContent.increaseRating(musicItem);
                 Intent intent = new Intent(context, DetailActivity.class);
-                intent.putExtra("musicItem", holder.mItem);
-                context.startActivity(intent, options.toBundle());
-            }
-        });
-        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                musicContent.markAsFavorite(holder.mItem.getID());
-                Toast.makeText(context, "Песня " + holder.mItem.getSongName() + " добавлена в избранное!", Toast.LENGTH_LONG).show();
-                return true;
+                intent.putExtra("musicItem", musicItem);
+                context.startActivity(intent);
             }
         });
     }
@@ -88,6 +82,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public int getItemCount() {
         return mValues.size();
     }
+
+
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        Collections.swap(mValues, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+
+    @Override
+    public void onItemDismiss(int position) {
+        final MusicItem musicItem = mValues.get(position);
+        musicContent.markAsFavorite(musicItem);
+        Toast.makeText(context, "Песня " + musicItem.getSongName() + " добавлена в избранное!", Toast.LENGTH_LONG).show();
+        notifyDataSetChanged();
+    }
+
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;

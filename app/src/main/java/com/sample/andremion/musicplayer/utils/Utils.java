@@ -27,6 +27,7 @@ public class Utils {
      */
     public void writeLocalFile(String filename, String data) {
         File file = new File(mContext.getFilesDir(), filename);
+
         //Открываем поток для записи в файл
         //Эта конструкция позволит правильно закрыть поток Java 7+
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {

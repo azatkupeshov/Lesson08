@@ -25,8 +25,8 @@ public interface MusicContent {
     ArrayList<MusicItem> getAllFavoriteSongs();
     ArrayList<MusicItem> getAllTopSongs();
 
-    MusicItem getSong(long id);
-    void markAsFavorite(long id);
+    void markAsFavorite(MusicItem musicItem);
+    void increaseRating(MusicItem musicItem);
     void putSong(MusicItem musicItem);
 
     class MusicItem implements Serializable {
@@ -35,12 +35,14 @@ public interface MusicContent {
         private final String mSongName;
         private final String mArtisName;
         private final long mDuration;
+        private final String path;
 
-        public MusicItem(long id, String songName, String artistName, long duration) {
+        public MusicItem(long id, String songName, String artistName, long duration, String path) {
             mID = id;
             mSongName = songName;
             mArtisName = artistName;
             mDuration = duration;
+            this.path = path;
         }
 
         public long getID() {
@@ -56,6 +58,10 @@ public interface MusicContent {
 
         public long getDuration() {
             return mDuration;
+        }
+
+        public String getPath() {
+            return path;
         }
     }
 }

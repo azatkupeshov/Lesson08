@@ -19,37 +19,28 @@ package com.sample.andremion.musicplayer.activities;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.sample.andremion.musicplayer.R;
-import com.sample.andremion.musicplayer.databases.DatabaseHelper;
 import com.sample.andremion.musicplayer.fragments.FavoriteFragment;
 import com.sample.andremion.musicplayer.fragments.MusicListFragment;
 import com.sample.andremion.musicplayer.fragments.TopFragment;
-import com.sample.andremion.musicplayer.music.MusicContent;
-import com.sample.andremion.musicplayer.music.MusicFinder;
-import com.sample.andremion.musicplayer.utils.Utils;
-import com.sample.andremion.musicplayer.view.RecyclerViewAdapter;
 
 import java.util.ArrayList;
 
@@ -63,10 +54,9 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -76,21 +66,51 @@ public class MainActivity extends AppCompatActivity {
             //Запрос необходимых разрешений если оно не доступно.
             ActivityCompat.requestPermissions(this, permissions, ALL_PERMISSIONS);
         }
+    }
 
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        boolean allPermission = true;
+        if (requestCode == ALL_PERMISSIONS) {
+            if (grantResults.length > 0 && permissions.length > 0) {
+                for (int i = 0; i < permissions.length; i++) {
+                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED)
+                        allPermission = false;
+                }
+            }
+            if (allPermission) {
+                loadUI();
+            }
+        }
+    }
+
+    private void loadUI() {
+        final ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter.addFragment(new MusicListFragment(), "Песни");
         viewPagerAdapter.addFragment(new FavoriteFragment(), "Избранное");
         viewPagerAdapter.addFragment(new TopFragment(), "Топ");
 
 
-        ViewPager viewPager = findViewById(R.id.viewpager);
+        final ViewPager viewPager = findViewById(R.id.viewpager);
         viewPager.setAdapter(viewPagerAdapter);
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                SwipeRefreshLayout.OnRefreshListener onRefreshListener =
+                        (SwipeRefreshLayout.OnRefreshListener) viewPagerAdapter.getItem(tab.getPosition());
+                onRefreshListener.onRefresh();
+            }
 
-        MusicContent musicContent = new DatabaseHelper(this);
-        MusicFinder musicFinder = new MusicFinder(this);
-        musicFinder.fillDatabase(musicContent);
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
     }
 
 
@@ -145,9 +165,9 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private static class ViewPagerAdapter extends FragmentStatePagerAdapter{
+    private static class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
-        ArrayList<Fragment> fragments  = new ArrayList<>();
+        ArrayList<Fragment> fragments = new ArrayList<>();
         ArrayList<String> titles = new ArrayList<>();
 
         public ViewPagerAdapter(FragmentManager fm) {
@@ -170,11 +190,12 @@ public class MainActivity extends AppCompatActivity {
             return titles.get(position);
         }
 
-        public ViewPagerAdapter addFragment(Fragment fragment, String title){
+        public ViewPagerAdapter addFragment(Fragment fragment, String title) {
             fragments.add(fragment);
             titles.add(title);
             return this;
         }
     }
+
 
 }

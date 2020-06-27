@@ -16,34 +16,68 @@
 
 package com.sample.andremion.musicplayer.activities;
 
+import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.transition.Transition;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.andremion.music.MusicCoverView;
+import com.sample.andremion.musicplayer.MusicService;
 import com.sample.andremion.musicplayer.R;
 import com.sample.andremion.musicplayer.music.MusicContent;
-import com.sample.andremion.musicplayer.view.TransitionAdapter;
+import com.sample.andremion.musicplayer.view.ProgressView;
 
 public class DetailActivity extends AppCompatActivity {
 
-    private MusicCoverView mCoverView;
+    MusicService musicService;
+    private ImageView mCoverView;
     private TextView tvArtistName;
     private TextView tvSongName;
+    private boolean isBind = false;
+    private boolean isPlay = false;
+    private FloatingActionButton fab;
+    private ProgressView progressView;
+    ObjectAnimator objectAnimator;
 
-    private MusicCoverView.Callbacks callbacks = new MusicCoverView.Callbacks() {
+
+    @SuppressLint("HandlerLeak")
+    private final Handler mUpdateProgressHandler = new Handler() {
         @Override
-        public void onMorphEnd(MusicCoverView coverView) {
-            // Nothing to do
+        public void handleMessage(Message msg) {
+            final int position = musicService.getPosition();
+            final int duration = (int) musicService.getDuration();
+            if (duration > 0)
+                progressView.setProgress(position * 100 / duration);
+            sendEmptyMessage(0);
+        }
+    };
+
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            musicService = ((MusicService.LocalBinder) service).getService();
+            mUpdateProgressHandler.sendEmptyMessage(0);
+            isBind = true;
         }
 
         @Override
-        public void onRotateEnd(MusicCoverView coverView) {
-            supportFinishAfterTransition();
+        public void onServiceDisconnected(ComponentName name) {
+            isBind = false;
+            mUpdateProgressHandler.removeMessages(0);
         }
     };
 
@@ -53,34 +87,58 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         mCoverView = findViewById(R.id.cover);
-        mCoverView.setCallbacks(callbacks);
-
+        progressView = findViewById(R.id.progress);
         tvArtistName = findViewById(R.id.tv_artist_name);
         tvSongName = findViewById(R.id.tv_song_name);
+        fab = findViewById(R.id.fab);
+
 
         Intent intent = getIntent();
         MusicContent.MusicItem musicItem = (MusicContent.MusicItem) intent.getSerializableExtra("musicItem");
 
+
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("musicItem", musicItem);
+        bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+
         tvArtistName.setText(musicItem.getArtistName());
         tvSongName.setText(musicItem.getSongName());
 
-        getWindow().getSharedElementEnterTransition().addListener(new TransitionAdapter() {
-            @Override
-            public void onTransitionEnd(Transition transition) {
-                mCoverView.start();
-            }
-        });
+        objectAnimator = getObjectAnimator(mCoverView);
+        objectAnimator.start();
+        isPlay = true;
     }
 
     @Override
     public void onBackPressed() {
-        onFabClick(null);
-        mCoverView.stop();
+        if (isBind) {
+            musicService.stop();
+            unbindService(connection);
+        }
+        finish();
     }
 
     public void onFabClick(View view) {
-        mCoverView.stop();
-        Toast.makeText(this, "Stop", Toast.LENGTH_SHORT).show();
+        if (isPlay) {
+            musicService.pause();
+            isPlay = false;
+            fab.setImageResource(R.drawable.ic_play_animatable);
+            objectAnimator.pause();
+        } else {
+
+            musicService.play();
+            isPlay = true;
+            fab.setImageResource(R.drawable.ic_pause_animatable);
+            objectAnimator.resume();
+        }
     }
 
+    private ObjectAnimator getObjectAnimator(View imageView) {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(imageView, "rotation", 0, 360);
+        animator.setDuration(3000);
+        animator.setRepeatCount(Animation.INFINITE);
+        animator.setRepeatMode(ObjectAnimator.RESTART);
+        animator.setInterpolator(new LinearInterpolator());
+        return animator;
+    }
 }
