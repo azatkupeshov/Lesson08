@@ -64,20 +64,15 @@ public class MusicListFragment extends Fragment implements SwipeRefreshLayout.On
         return view;
     }
 
-    @Override
     public void onRefresh() {
         if (swipeRefreshLayout != null)
             swipeRefreshLayout.setRefreshing(false);
-        if (content == null)
-            content = new DatabaseHelper(getContext());
-        if (adapter == null)
-            adapter = new RecyclerViewAdapter(content.getAllSongs(), getContext());
-
-        if (musicItems == null) {
-            musicItems = content.getAllSongs();
+        if (content != null && adapter != null) {
+            if (musicItems != null) {
+                musicItems.clear();
+                musicItems.addAll(content.getAllSongs());
+            }
+            adapter.notifyDataSetChanged();
         }
-        musicItems.clear();
-        musicItems.addAll(content.getAllSongs());
-        adapter.notifyDataSetChanged();
     }
 }

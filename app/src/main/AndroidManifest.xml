@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -23,12 +22,12 @@
         </activity>
         <activity
             android:name=".activities.DetailActivity"
-            android:theme="@style/AppTheme.Detail"></activity>
+            android:theme="@style/AppTheme.Detail" />
 
         <service
             android:name=".MusicService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
     </application>
 

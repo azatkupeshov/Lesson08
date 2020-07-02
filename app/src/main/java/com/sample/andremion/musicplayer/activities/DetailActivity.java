@@ -125,7 +125,6 @@ public class DetailActivity extends AppCompatActivity {
             fab.setImageResource(R.drawable.ic_play_animatable);
             objectAnimator.pause();
         } else {
-
             musicService.play();
             isPlay = true;
             fab.setImageResource(R.drawable.ic_pause_animatable);
